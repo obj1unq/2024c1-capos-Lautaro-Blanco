@@ -3,20 +3,39 @@ import castillo.*
 
 object rolando{
 	
-	var capacidad = 2
-	const property artefactos = #{} //el const property es un getter, le muestro la coleccion, pero no permito que agregue cosas
-	var hogar = castilloDePiedra	//es para no cambiar el tipo de variable
-	const property historiaDeArtefactos = []
-									
-	method agarrar(artefacto){
+	var property capacidad = 2
+	var property artefactos = #{}
+	var property hogar = castilloDePiedra
+	const property historialDeArtefactos = []
+	var property poderBase = 5
+	
+	method encontrar(artefacto){
 		if(self.puedeAgregar()){
 			artefactos.add(artefacto)
 		}
-		historiaDeArtefactos.add(artefactos)
+		historialDeArtefactos.add(artefacto)
 	}
 	
 	method puedeAgregar(){
-		return artefactos.size() < capacidad
+		return artefactos.size()<capacidad
+	}
+	
+	method poderPelea() {
+		return self.poderBase() + self.poderArtefactos()
+	}
+	
+	method poderArtefactos() {
+		return artefactos.sum({ artefacto => artefacto.poder(self) })
+
+// NOOOOO!! ASI NO!! EL FOR EACH ES SOLO PARA ORDENES!
+//		var acumulador = 0
+//		artefactos.forEach({artefacto => acumulador += artefacto.poder(self) })
+//		return acumulador
+	}
+	
+	method batalla() {
+		artefactos.forEach({artefacto => artefacto.usar() })
+		poderBase += 1
 	}
 	
 	method irAlHogar(){
@@ -38,6 +57,38 @@ object rolando{
 	
 	method todasLasPosesiones(){
 		return artefactos.union(hogar.baul())
+	}
+	
+	method poderInvocacion() {
+		return hogar.poderInvocacion(self)
+	}
+	
+	method enemigosVencibles(tierra) {
+		return tierra.vencibles(self)
+	}
+	
+	method vencible(enemigo) {
+		return enemigo.poderPelea() < self.poderPelea()
+	}
+	
+	method tieneArmaFatal(enemigo) {
+		return artefactos.any({artefacto => self.esFatal(artefacto, enemigo)})
+	}
+		
+	method esFatal(artefacto, enemigo) {
+		return artefacto.poder(self) > enemigo.poderPelea()
+	}
+	
+	method cantidadArmasFatales(enemigo) {
+		return artefactos.count({artefacto => self.esFatal(artefacto, enemigo)})
+	}
+	
+	method armaFatal(enemigo) {
+		return artefactos.find({artefacto => self.esFatal(artefacto, enemigo)})
+	}
+	
+	method armasFatales(enemigo) {
+		return artefactos.filter({artefacto => self.esFatal(artefacto, enemigo)})
 	}
 	
 }
